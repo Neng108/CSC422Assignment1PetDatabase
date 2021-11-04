@@ -118,11 +118,40 @@ public class PetDatabase {
     }//end of removeAPet()
     
     public static void searchPetsByName(){
+        System.out.println("Enter a name to search: ");
+        String name = input.nextLine(); 
         
+        //Once user inputs the name, display the pet's information 
+        printTableHeader();//header first 
+        
+        int numberOfRows = 0; //Declare and initialize numberOfRows to 0 to get the # of rows for each pet with a certain name. numberOfRows will be used for the footer
+        
+        for(int i = 0; i < petCount; i++){//Iterate through the pets array 
+            if(pets[i].getName().equalsIgnoreCase(name)){//Using .equalsIgnoreCase because name will be case insensitive. 
+            printTableRow(i, pets[i].getName(), pets[i].getAge());//Print the row(s)
+            numberOfRows++;//Adding 1 to numberOfRows everytime the user's input of the name equals a name in the pets array 
+            } 
+        }//end of for loop 
+        
+        printTableFooter(numberOfRows);//Call printTabelFooter method with the numberOfRows 
     }//end of searchPetsByName()
     
     public static void searchPetsByAge(){
-    
+        System.out.println("Enter age to search: ");
+        int age = input.nextInt(); 
+        
+        printTableHeader(); 
+        
+        int numberOfRows = 0; 
+        
+        for(int i = 0; i < petCount; i++){ 
+            if(pets[i].getAge() == age){//compare the pet's (int) age to user's input        
+            printTableRow(i, pets[i].getName(), pets[i].getAge()); 
+            numberOfRows++;
+            } 
+        }//end of for loop 
+        
+        printTableFooter(numberOfRows);
     }//end of searchPetsByAge()
     
     public static void printTableHeader(){//Prints the header of the table
