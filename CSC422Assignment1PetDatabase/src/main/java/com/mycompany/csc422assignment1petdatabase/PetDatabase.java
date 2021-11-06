@@ -24,8 +24,8 @@ public class PetDatabase {
             System.out.println("\nWhat would you like to do?");
             System.out.println(" 1) View all pets");
             System.out.println(" 2) Add more pets");
-            System.out.println(" 3) Update and existing pet"); 
-            System.out.println(" 4) Remove and existing pet");
+            System.out.println(" 3) Update an existing pet"); 
+            System.out.println(" 4) Remove an existing pet");
             System.out.println(" 5) Search pets by name");
             System.out.println(" 6) Search pets by age"); 
             System.out.println(" 7) Exit the program");
@@ -106,15 +106,56 @@ public class PetDatabase {
         //So if the user only adds 1 or 2 pets this will number will be displayed instead. Using petCount will display number of pets in the entire array/database
         }//end of while loop for adding pets 
         
-        System.out.println(numberOfPetsAdded + " pets added");
+        System.out.println(numberOfPetsAdded + " pet(s) added.");
     }//end of addMorePets()
     
     public static void updateAPet(){
-    
+        showAllPets();//show the user the table of all the pets first
+        
+        System.out.println("Enter the pet ID you want to update: ");
+        int petID = input.nextInt();//save user's input of the ID, which is the object's index of the array 
+        input.nextLine(); 
+        
+        System.out.println("Enter the new name and new age: ");
+        String newPet = input.nextLine(); //save the string of the new name and age 
+        
+        //split up the user's new name and age with the space 
+        int space = 0;
+        while(newPet.charAt(space) != ' '){
+            space++; //retrieve the space ' ' index 
+        }
+        //use substring to seperate and save new name and new age for pet 
+        String name = newPet.substring(0, space); 
+        int age = Integer.parseInt(newPet.substring(space+1)); 
+        
+        //Save the name and age of the pet the user is about to update/or known as the the original name and age
+        String previousPetName = pets[petID].getName();
+        int previousPetAge = pets[petID].getAge();
+        
+        //Call both the setName and setAge method in the Pet Class to set and update the pet 
+        pets[petID].setName(name);
+        pets[petID].setAge(age); 
+        
+        //Display the message after updating 
+        System.out.println(previousPetName+ " " + previousPetAge + " has changed to " + name + " " + age + ".");
     }//end of updatePet()
     
     public static void removeAPet(){
-    
+        showAllPets();//Display the table of pets first 
+        
+        System.out.println("Enter the pet ID to remove: ");//prompts the user for an index or known as the ID of the pet 
+        int petID = input.nextInt(); 
+        
+        //Saving the petID as a new object. This is to display to the user what pet they removed. 
+        Pet petObject = pets[petID]; 
+        
+        for(int i = petID; i < petCount; i++){//for loop to iterate through the pets array 
+            pets[i] = pets[i+1];//replacing the pet object that was deleted with the following pets after it. Keeping the indexes in the correct position
+        }
+        
+        System.out.println(petObject.getName() + " " + petObject.getAge() + " is removed.");//Print out the pet's name and age that was deleted 
+        
+        petCount--;//Subtract one to petCount since a pet was removed. 
     }//end of removeAPet()
     
     public static void searchPetsByName(){
@@ -168,7 +209,7 @@ public class PetDatabase {
     
     public static void printTableFooter(int rowCount){//Prints the footer/how many rows in the set 
         System.out.println("+------------------------------+");
-        System.out.println(rowCount + " rows in set. ");
+        System.out.println(rowCount + " row(s) in set. ");
     }//end of printTableFooter
     
 }//end of class CSC422PetDatabase
