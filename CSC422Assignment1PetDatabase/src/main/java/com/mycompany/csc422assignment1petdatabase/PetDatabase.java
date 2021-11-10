@@ -1,34 +1,39 @@
 /*
 Neng Yang - yangn20@csp.edu
-CSC 422 Assignment 1, Part 2
-Topics: version control
+CSC 422 Assignment 2, Part 2
+Topics: Github Issue and project 
 Program: Pet database program for managing information (name and age) about pets.
 Allow the user to add pet information to the database, remove pet information, updating, and searching for a pet by name or by age. 
 NOTE* Assume user only inputs pets name consisting of a single word.
+Allow loading pet data from text file, and saving to text file.
+Handle Errors
 */
 package com.mycompany.csc422assignment1petdatabase;
 
 import java.util.Scanner;
+import java.io.*;
 
 public class PetDatabase {
     
     public static Pet[] pets = new Pet[1000]; //The Pet array used to store pet objects 
+    public static String[] inputSplit = new String[100];//array for splitting the user input of name and age. 
     public static int petCount = 0; //A pet counter variable 
     public static Scanner input = new Scanner(System.in); //Scanner object for reading the inputs from the user
+    public static String fileName = "petFile.txt";
     
-    public static void main(String[] args){
+    public static void main(String[] args) throws Exception{
         System.out.println("Pet Database Program"); 
-        
+        loadPetDataFile();//load the pet data file 
         while(true){
             //Option menu for user 
             System.out.println("\nWhat would you like to do?");
             System.out.println(" 1) View all pets");
             System.out.println(" 2) Add more pets");
-            System.out.println(" 3) Update an existing pet"); 
-            System.out.println(" 4) Remove an existing pet");
-            System.out.println(" 5) Search pets by name");
-            System.out.println(" 6) Search pets by age"); 
-            System.out.println(" 7) Exit the program");
+            //System.out.println(" 3) Update an existing pet"); 
+            System.out.println(" 3) Remove an existing pet");
+            //System.out.println(" 5) Search pets by name");
+            //System.out.println(" 6) Search pets by age"); 
+            System.out.println(" 4) Exit the program");
             System.out.println("Your choice: ");
             int choice = input.nextInt(); 
             input.nextLine();
@@ -44,13 +49,16 @@ public class PetDatabase {
                     break;
                 }
                 case 3:{ 
-                    updateAPet();
+                    removeAPet();
+                    //updateAPet();
                     break;
                 }
                 case 4:{ 
-                    removeAPet(); 
-                    break;
+                    System.out.println("Goodbye!");
+                    savePetDataFile();//save pet data to the file when user quits. 
+                    return;
                 }
+                /*
                 case 5:{
                     searchPetsByName(); 
                     break;
@@ -63,9 +71,51 @@ public class PetDatabase {
                     System.out.println("Goodbye!");
                     return;
                 }
+                */
             }//End of switch statement 
         }//End of while loop 
     }//end of main 
+    
+    public static void loadPetDataFile() throws Exception{
+        try{
+            File petDataFile = new File(fileName); 
+            Scanner input = new Scanner(petDataFile);//Create the scanner object to read from file. 
+            
+            while(input.hasNext()){//while loop to read each line of the file 
+                String data = input.nextLine();
+                inputSplit = data.split(" ");//split the name and age 
+                
+                String name = inputSplit[0];
+                int age = Integer.parseInt(inputSplit[1]);// convert the String age to int 
+                
+                //store into the array to be displayed 
+                Pet petObject = new Pet(name, age);
+                pets[petCount] = petObject; 
+                petCount++; 
+            }//end of while loop 
+        }
+        catch(FileNotFoundException ex){//catch for error handling if file doesn't exist yet. 
+            System.out.println("Pet file does not exist yet");
+        }
+    }//end of loadPetDataFile
+    
+    public static void savePetDataFile() throws IOException{
+        File petfile = new File(fileName);//create the file 
+        
+        if (petfile.exists()) {//Display to user if file exists already when saving/exit program
+          System.out.println("File already exists");
+        }
+        
+        //Write to the file using PrintWriter object
+        PrintWriter output = new PrintWriter(petfile);
+        
+        //add each of the pet's name and age to the file 
+        for(int i = 0; i < petCount; i++){
+            output.println(pets[i].getName() + " " + pets[i].getAge());
+        }
+        // Close the file
+        output.close();
+    }
     
     public static void showAllPets(){
         printTableHeader();//Call printTableHeader method to print header
@@ -101,7 +151,7 @@ public class PetDatabase {
             
             pets[petCount] = petObject; //iterate through each index of the array and store the object using petCount 
             petCount++; 
-        
+            
         numberOfPetsAdded++; //numberOfPetsAdded is needed to show the user how many pets they added once addPets() is entered and existed 
         //So if the user only adds 1 or 2 pets this will number will be displayed instead. Using petCount will display number of pets in the entire array/database
         }//end of while loop for adding pets 
