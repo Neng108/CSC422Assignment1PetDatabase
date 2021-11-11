@@ -29,7 +29,7 @@ public class PetDatabase {
             System.out.println("\nWhat would you like to do?");
             System.out.println(" 1) View all pets");
             System.out.println(" 2) Add more pets");
-            //System.out.println(" 3) Update an existing pet"); 
+            //System.out.println(" 3) Update an existing pet");  
             System.out.println(" 3) Remove an existing pet");
             //System.out.println(" 5) Search pets by name");
             //System.out.println(" 6) Search pets by age"); 
@@ -83,8 +83,7 @@ public class PetDatabase {
             
             while(input.hasNext()){//while loop to read each line of the file 
                 String data = input.nextLine();
-                inputSplit = data.split(" ");//split the name and age 
-                
+                splitPetInput(data); //split the data into name and age using splitPetInput() method 
                 String name = inputSplit[0];
                 int age = Integer.parseInt(inputSplit[1]);// convert the String age to int 
                 
@@ -128,35 +127,60 @@ public class PetDatabase {
         //NOTE* petCount keeps track of how many pets are the in the array/database
     }//end of showAllPets()
     
-    public static void addMorePets(){
+    public static void splitPetInput(String pet) throws InvalidInputException{//method for splitting up the user's input for pet
+        inputSplit = pet.split(" ");//Split the user's input of String pet using a space. Store values into inputSplit 1D Array 
+            if(inputSplit.length != 2){//Error: if String pet doesn't have two values, name and age. throw the InvalidInputException
+                throw new InvalidInputException();
+            }
+    }//end of splitPetInput
+    
+    public static void addMorePets() throws Exception{
         int numberOfPetsAdded = 0; //Variable to keep track of number of pets to be printed for the user 
         while(true){//while loop for user input for adding pets 
-            System.out.println("add pet (name, age): ");
-            String userPet = input.nextLine(); 
-        
-            if(userPet.equalsIgnoreCase("done")){ //if user types "done" break out of loop 
-                break; 
+                System.out.println("add pet (name, age): ");
+                String userPet = input.nextLine(); 
+            try{
+                if(userPet.equalsIgnoreCase("done")){ //if user types "done" break out of loop 
+                    break; 
+                }
+
+                splitPetInput(userPet);//split the user's input of pet: name and age
+
+                String name = inputSplit[0]; //use inputSplit array to retrieve the name and age 
+                int age = Integer.parseInt(inputSplit[1]);
+                
+                if(petCount == 5){//Error if database reached 5 entries yet. 
+                    throw new DatabaseFullException();
+                }
+                else{
+                    if(age < 1 || age > 20){//Error if age is between 1 and 20 
+                        throw new InvalidAgeInputException();
+                    }
+                    else{
+                        Pet petObject = new Pet(name, age);//create a new pet object using the name and age found above 
+                        pets[petCount] = petObject; //iterate through each index of the array and store the object using petCount 
+                        petCount++; 
+                    }
+                }
+            numberOfPetsAdded++; //numberOfPetsAdded is needed to show the user how many pets they added once addPets() is entered and existed 
+            //So if the user only adds 1 or 2 pets this will number will be displayed instead. Using petCount will display number of pets in the entire array/database
+            }//end of try
+            
+            //catch errors and then print the following messages for each error
+            catch(InvalidAgeInputException e){
+                System.out.println("Error: " + inputSplit[1] + " is not a valid age."); 
             }
-            //Need to extract out the name and age 
-            //String name; 
-            int space = 0;//creating the int index for the space in which the name and age will be split at  
-                while(userPet.charAt(space) != ' '){//while loop to add 1 to space index for every index of the single string 
-                    space++;//add one to int space until the space separating the name and age is reached 
-                }//end of while loop finding the int index for the space between the name and age 
-        
-            String name = userPet.substring(0, space); //substring(starting index at 0, to index of the space found above) to get pet name 
-            int age = Integer.parseInt(userPet.substring(space+1)); //substring(starting index at the space index, to the rest of the string) to get age 
+            catch(InvalidInputException e){
+                System.out.println("Error: " + userPet + " is not a valid input.");
+            }
+            catch(DatabaseFullException e){
+                System.out.println("Error: Database is full.");
+                break;//break out of the loop if database is full, so user doesn't type in anymore pets 
+            }
             
-            Pet petObject = new Pet(name, age);//create a new pet object using the name and age found above 
-            
-            pets[petCount] = petObject; //iterate through each index of the array and store the object using petCount 
-            petCount++; 
-            
-        numberOfPetsAdded++; //numberOfPetsAdded is needed to show the user how many pets they added once addPets() is entered and existed 
-        //So if the user only adds 1 or 2 pets this will number will be displayed instead. Using petCount will display number of pets in the entire array/database
         }//end of while loop for adding pets 
         
-        System.out.println(numberOfPetsAdded + " pet(s) added.");
+        System.out.println(numberOfPetsAdded + " pet(s) added."); //show user how many pets are added.
     }//end of addMorePets()
     
     public static void updateAPet(){
@@ -196,16 +220,27 @@ public class PetDatabase {
         System.out.println("Enter the pet ID to remove: ");//prompts the user for an index or known as the ID of the pet 
         int petID = input.nextInt(); 
         
-        //Saving the petID as a new object. This is to display to the user what pet they removed. 
-        Pet petObject = pets[petID]; 
+        try{
+            if(petID < 0 || petID > petCount){//throw new Exceptions if user's input of ID is not an index of the array
+                throw new InvalidIDException();
+            }
+            else{
+                //Saving the petID as a new object. This is to display to the user what pet they removed. 
+                Pet petObject = pets[petID]; 
+
+                for(int i = petID; i < petCount; i++){//for loop to iterate through the pets array 
+                    pets[i] = pets[i+1];//replacing the pet object that was deleted with the following pets after it. Keeping the indexes in the correct position
+                }
+
+                System.out.println(petObject.getName() + " " + petObject.getAge() + " is removed.");//Print out the pet's name and age that was deleted 
+
+                petCount--;//Subtract one to petCount since a pet was removed. 
+            }
+        }//end of try
+        catch(InvalidIDException ex){//catch error and print message
+            System.out.println("Error: ID "+petID+" does not exist.");
+        }//end of catch()
         
-        for(int i = petID; i < petCount; i++){//for loop to iterate through the pets array 
-            pets[i] = pets[i+1];//replacing the pet object that was deleted with the following pets after it. Keeping the indexes in the correct position
-        }
-        
-        System.out.println(petObject.getName() + " " + petObject.getAge() + " is removed.");//Print out the pet's name and age that was deleted 
-        
-        petCount--;//Subtract one to petCount since a pet was removed. 
     }//end of removeAPet()
     
     public static void searchPetsByName(){
